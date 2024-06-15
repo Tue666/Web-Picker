@@ -3,14 +3,18 @@ import styled from "styled-components";
 import { ConstantConfig } from "../../../config";
 import { useTheme } from "../../../hooks";
 import { IPicker } from "../../../interfaces";
-import { TimeUtil } from "../../../utils";
+import { NumberUtil, TimeUtil } from "../../../utils";
 import DaySelect from "./DaySelect.component";
 import YearSelect from "./YearSelect.component";
 import Icon from "../../Icon.component";
 import Button from "../../Button.component";
 
-const { BOX, MODAL } = ConstantConfig;
+const { BOX, DAYS_IN_WEEK, MODAL, NUMBER } = ConstantConfig;
 const { DATE_PICKER } = MODAL;
+
+const CONTENT_WIDTH =
+  DATE_PICKER.WIDTH - (BOX.PADDING * 2 + DATE_PICKER.PADDING * 2);
+const CONTENT_ROWS = 7; // Includes 1 row for day and 6 lines for date
 
 interface RootProps {
   $backgroundColor: string;
@@ -32,7 +36,13 @@ const DatePicker = (props: DatePickerProps): React.JSX.Element => {
     year: date?.year ?? now.getFullYear(),
   });
   const dateRef = useRef(selectingDate); // Keep track the selected day
-  const { paper } = useTheme();
+  const { outline, paper } = useTheme();
+  const numberSize = NumberUtil.calculateNumberSize(
+    CONTENT_WIDTH,
+    DAYS_IN_WEEK
+  );
+  const contentHeight =
+    DATE_PICKER.PADDING * 2 + (numberSize + NUMBER.MARGIN * 2) * CONTENT_ROWS;
   const disablePrev = TimeUtil.isMinAvailableYear(
     selectingDate.month,
     selectingDate.year
@@ -60,13 +70,15 @@ const DatePicker = (props: DatePickerProps): React.JSX.Element => {
           style={{ cursor: "pointer" }}
           onClick={onPressChangeYearVisible}
         >
-          <span className="bold">
+          <span className="bold" style={{ paddingRight: BOX.PADDING / 1.5 }}>
             {TimeUtil.toMonthText(selectingDate.month)} {selectingDate.year}
           </span>
           <Icon
-            icon={
-              !yearVisible ? "bi bi-caret-down-fill" : "bi bi-caret-up-fill"
-            }
+            icon="bi bi-caret-down-fill"
+            style={{
+              padding: 0,
+              transform: `rotate(${yearVisible ? 180 : 0}deg)`,
+            }}
           />
         </div>
         {!yearVisible && (
@@ -98,6 +110,8 @@ const DatePicker = (props: DatePickerProps): React.JSX.Element => {
       </div>
       {!yearVisible && (
         <DaySelect
+          numberSize={numberSize}
+          height={contentHeight}
           date={selectingDate}
           dateRef={dateRef.current}
           onSelectDay={onSelectDay}
@@ -105,6 +119,7 @@ const DatePicker = (props: DatePickerProps): React.JSX.Element => {
       )}
       {yearVisible && (
         <YearSelect
+          height={contentHeight}
           year={selectingDate.year}
           onToggleVisibleYear={onPressChangeYearVisible}
           onSelectDate={onSelectDate}
@@ -112,7 +127,11 @@ const DatePicker = (props: DatePickerProps): React.JSX.Element => {
       )}
       <div className="row opposite">
         <div></div>
-        <Button title="cancel" onClick={onCloseModal} />
+        <Button
+          title="cancel"
+          onClick={onCloseModal}
+          style={{ color: outline }}
+        />
       </div>
     </Root>
   );

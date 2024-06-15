@@ -16,9 +16,12 @@ const HourSelect = (props: HourSelectProps): React.JSX.Element => {
     subValue: hour === 12 ? 0 : hour + 12,
   }));
 
-  const onSelectValue = (value: IPicker.TimePicker["hour"]) => {
+  const onSelectValue = (
+    value: IPicker.TimePicker["hour"],
+    ok: boolean = false
+  ) => {
     onSelectTime({ hour: value });
-    onSelectMode("minute");
+    ok && onSelectMode("minute");
   };
   return (
     <TimeClock

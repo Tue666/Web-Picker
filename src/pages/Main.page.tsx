@@ -14,16 +14,8 @@ interface RootProps {
 }
 
 const MainPage = (): React.JSX.Element => {
-  const now = new Date();
-  const [date, setDate] = useState<IPicker.DatePicker | undefined>({
-    day: now.getDate(),
-    month: now.getMonth() + 1,
-    year: now.getFullYear(),
-  });
-  const [time, setTime] = useState<IPicker.TimePicker | undefined>({
-    hour: now.getHours(),
-    minute: now.getMinutes(),
-  });
+  const [date, setDate] = useState<IPicker.DatePicker | undefined>(undefined);
+  const [time, setTime] = useState<IPicker.TimePicker | undefined>(undefined);
   const { background, text } = useTheme();
 
   const onChangeDatePicker = (date?: IPicker.DatePicker) => {

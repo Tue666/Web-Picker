@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { ConstantConfig } from "../config";
 import { useTheme } from "../hooks";
+import { NumberUtil } from "../utils";
 
 const { NUMBER } = ConstantConfig;
 
@@ -9,6 +10,7 @@ interface RootProps {
   $transparent: boolean;
   $size: number;
   $backgroundColor: string;
+  $textColor: string;
   $outlineColor: string;
 }
 
@@ -25,6 +27,7 @@ interface NumberProps extends React.HTMLAttributes<HTMLDivElement> {
   isSelected?: boolean;
   transparent?: boolean;
   value?: string | number;
+  [key: string]: any;
 }
 
 const Number = (props: NumberProps): React.JSX.Element => {
@@ -37,25 +40,23 @@ const Number = (props: NumberProps): React.JSX.Element => {
     size ||
     (!intend
       ? NUMBER.SIZE
-      : Math.floor(
-          (intend.containerWidth - intend.rowSize * NUMBER.MARGIN * 2) /
-            intend.rowSize
-        ));
-  const bgColor = isSelected ? primary?.main : background;
-  const textColor = isSelected ? primary?.contrastText : text;
+      : NumberUtil.calculateNumberSize(intend.containerWidth, intend.rowSize));
+  const bgColor = isSelected ? primary.main : background;
+  const textColor = isSelected ? primary.contrastText : text;
 
   return (
     <Root
       $transparent={!!transparent}
       $size={defaultSize}
       $backgroundColor={transparent ? "transparent" : bgColor}
+      $textColor={textColor}
       $outlineColor={isSelected ? bgColor : outline}
       className="row center"
       {...rest}
     >
-      {!transparent && value !== undefined && (
-        <span style={{ color: textColor }}>{value}</span>
-      )}
+      {!transparent &&
+        value !== undefined && // <label style={{ color: textColor, ...textStyle }}>{value}</label>
+        value}
       {!transparent && value === undefined && isSelected && (
         <Dot $backgroundColor={text} />
       )}
@@ -71,6 +72,7 @@ const Root = styled("div")<RootProps>`
   cursor: pointer;
   visibility: ${(props) => (props.$transparent ? "hidden" : "visible")};
   background-color: ${(props) => props.$backgroundColor};
+  color: ${(props) => props.$textColor};
   transition: 0.3s;
   &:hover {
     background-color: ${(props) => props.$outlineColor};

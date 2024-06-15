@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { ConstantConfig } from "../config";
 import { useTheme } from "../hooks";
@@ -22,7 +22,7 @@ interface TimeClockProps {
   numberSize?: number;
   zeroPrefix?: boolean;
   subZeroPrefix?: boolean;
-  callback?: (value: number) => any;
+  callback?: (value: number, ok?: boolean) => any;
 }
 
 const TimeClock = (props: TimeClockProps): React.JSX.Element => {
@@ -34,13 +34,76 @@ const TimeClock = (props: TimeClockProps): React.JSX.Element => {
     subZeroPrefix = true,
     callback,
   } = props;
+  const [isMouseDown, setIsMouseDown] = useState(false);
   const { text, outline, secondary } = useTheme();
   const defaultNumberSize = numberSize || NUMBER.SIZE;
   const defaultSubNumberSize = defaultNumberSize;
   const rotateDeg = CIRCLE_DEGREE / wheel.length;
 
-  const onPressValue = (value: number) => {
-    callback && callback(value);
+  const onPressValue = (value: number, ok: boolean = false) => {
+    callback && callback(value, ok);
+  };
+  const onMouseDownValue = (value: number) => {
+    setIsMouseDown(true);
+    onPressValue(value);
+  };
+  const onMouseEnterValue = (value: number) => {
+    if (!isMouseDown) return;
+    onPressValue(value);
+  };
+  const onMouseUpValue = (value: number) => {
+    setIsMouseDown(false);
+    onPressValue(value, true);
+  };
+  const renderMove = (value: number, render: () => React.JSX.Element) => {
+    return (
+      <div
+        onMouseDown={() => onMouseDownValue(value)}
+        onMouseEnter={() => onMouseEnterValue(value)}
+        onMouseUp={() => onMouseUpValue(value)}
+      >
+        {render()}
+      </div>
+    );
+  };
+  const renderNumber = (
+    size: number,
+    value: number,
+    isSelected: boolean,
+    isSub: boolean,
+    display?: string
+  ) => {
+    return (
+      <Number
+        size={size}
+        value={display}
+        isSelected={isSelected}
+        style={{
+          margin: 0,
+          cursor: isMouseDown ? "move" : "pointer",
+          userSelect: isMouseDown ? "none" : "initial",
+          backgroundColor: isSelected ? secondary.main : "transparent",
+          transform: `rotate(-${value * rotateDeg}deg)`,
+          color: isSelected ? secondary.contrastText : isSub ? outline : text,
+        }}
+        onClick={() => onPressValue(value, true)}
+      />
+    );
+  };
+  const renderLine = (size: number, isSub: boolean = false) => {
+    return (
+      <SectorLine
+        style={{
+          backgroundColor: secondary.main,
+          height:
+            TIME_PICKER.CLOCK_SIZE / 2 -
+            (isSub ? size + defaultNumberSize : size),
+          transform: `translateX(${
+            size / 2 - TIME_PICKER.LINE_SIZE / 2
+          }px) translateY(${size}px)`,
+        }}
+      />
+    );
   };
   return (
     <Root>
@@ -58,79 +121,43 @@ const TimeClock = (props: TimeClockProps): React.JSX.Element => {
               transform: `translateX(${
                 (defaultNumberSize / 2) * -1
               }px) rotate(${value * rotateDeg}deg)`,
-              zIndex: visible ? value + 2 : 1,
+              zIndex:
+                isMouseDown || !(isSubValueSelected || isValueSelected) ? 2 : 1,
             }}
           >
             <div className="col center">
-              <div>
-                {isValueSelected && (
-                  <SectorLine
-                    style={{
-                      backgroundColor: secondary.main,
-                      height: TIME_PICKER.CLOCK_SIZE / 2 - defaultNumberSize,
-                      transform: `translateX(${
-                        defaultNumberSize / 2 - TIME_PICKER.LINE_SIZE / 2
-                      }px) translateY(${defaultNumberSize}px)`,
-                    }}
-                  />
-                )}
-                <Number
-                  size={defaultNumberSize}
-                  value={
+              {renderMove(value, () => (
+                <>
+                  {isValueSelected && renderLine(defaultNumberSize)}
+                  {renderNumber(
+                    defaultNumberSize,
+                    value,
+                    isValueSelected,
+                    false,
                     visible
                       ? zeroPrefix
                         ? NumberUtil.toZeroPrefix(value)
-                        : value
+                        : value.toString()
                       : undefined
-                  }
-                  isSelected={isValueSelected}
-                  style={{
-                    margin: 0,
-                    backgroundColor: isValueSelected
-                      ? secondary.main
-                      : "transparent",
-                    transform: `rotate(-${value * rotateDeg}deg)`,
-                    color: isValueSelected ? secondary.contrastText : text,
-                  }}
-                  onClick={() => onPressValue(value)}
-                />
-              </div>
-              {visible && subValue !== undefined && (
-                <div>
-                  {isSubValueSelected && (
-                    <SectorLine
-                      style={{
-                        backgroundColor: secondary.main,
-                        height:
-                          TIME_PICKER.CLOCK_SIZE / 2 -
-                          (defaultNumberSize + defaultSubNumberSize),
-                        transform: `translateX(${
-                          defaultSubNumberSize / 2 - TIME_PICKER.LINE_SIZE / 2
-                        }px) translateY(${defaultSubNumberSize}px)`,
-                      }}
-                    />
                   )}
-                  <Number
-                    size={defaultSubNumberSize}
-                    value={
+                </>
+              ))}
+              {visible &&
+                subValue !== undefined &&
+                renderMove(subValue, () => (
+                  <>
+                    {isSubValueSelected && renderLine(defaultNumberSize, true)}
+                    {renderNumber(
+                      defaultSubNumberSize,
+                      subValue,
+                      isSubValueSelected,
+                      true,
                       subZeroPrefix
                         ? NumberUtil.toZeroPrefix(subValue)
-                        : subValue
-                    }
-                    style={{
-                      margin: 0,
-                      backgroundColor: isSubValueSelected
-                        ? secondary.main
-                        : "transparent",
-                      transform: `rotate(-${value * rotateDeg}deg)`,
-                      color: isSubValueSelected
-                        ? secondary.contrastText
-                        : outline,
-                    }}
-                    onClick={() => onPressValue(subValue)}
-                  />
-                </div>
-              )}
+                        : subValue.toString()
+                    )}
+                  </>
+                ))}
             </div>
           </Sector>
         );
