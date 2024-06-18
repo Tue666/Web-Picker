@@ -1,14 +1,8 @@
 import React from "react";
-import { Modal } from "./components";
 import { MainPage } from "./pages";
 
 const App = (): React.JSX.Element => {
-  return (
-    <React.Fragment>
-      <Modal />
-      <MainPage />
-    </React.Fragment>
-  );
+  return <MainPage />;
 };
 
 export default App;

@@ -7,6 +7,7 @@ import { NumberUtil } from "../../../utils";
 import Button from "../../Button.component";
 import HourSelect from "./HourSelect.component";
 import MinuteSelect from "./MinuteSelect.component";
+import { ModalComponentType } from "../../Input.component";
 
 const { BOX, MODAL } = ConstantConfig;
 const { TIME_PICKER } = MODAL;
@@ -15,19 +16,15 @@ interface RootProps {
   $backgroundColor: string;
 }
 
-interface TimePickerProps {
-  onCloseModal: () => void;
-  time?: IPicker.TimePicker;
-  onChangeTimePicker?: (time: IPicker.TimePicker) => void;
-}
+interface TimePickerProps extends ModalComponentType<IPicker.TimePicker> {}
 
 const TimePicker = (props: TimePickerProps): React.JSX.Element => {
-  const { onCloseModal, time, onChangeTimePicker } = props;
+  const { value, onCloseModal, onConfirmValue } = props;
   const now = new Date();
   const [selectingMode, setSelectingMode] = useState<IPicker.TimeMode>("hour");
   const [selectingTime, setSelectingTime] = useState({
-    hour: time?.hour ?? now.getHours(),
-    minute: time?.minute ?? now.getMinutes(),
+    hour: value?.hour ?? now.getHours(),
+    minute: value?.minute ?? now.getMinutes(),
   });
   const { paper, text, outline, secondary } = useTheme();
 
@@ -38,7 +35,7 @@ const TimePicker = (props: TimePickerProps): React.JSX.Element => {
     setSelectingTime({ ...selectingTime, ...time });
   };
   const onPressConfirm = () => {
-    onChangeTimePicker && onChangeTimePicker(selectingTime);
+    onConfirmValue && onConfirmValue(selectingTime);
     onCloseModal();
   };
   return (

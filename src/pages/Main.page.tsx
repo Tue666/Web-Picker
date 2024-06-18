@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Picker } from "../components";
+import { DateInput, TimeInput } from "../components";
 import { ConstantConfig } from "../config";
 import { useTheme } from "../hooks";
 import { IPicker } from "../interfaces";
-import { TimeUtil } from "../utils";
 
 const { BOX } = ConstantConfig;
 
@@ -18,45 +17,30 @@ const MainPage = (): React.JSX.Element => {
   const [time, setTime] = useState<IPicker.TimePicker | undefined>(undefined);
   const { background, text } = useTheme();
 
-  const onChangeDatePicker = (date?: IPicker.DatePicker) => {
-    setDate(date);
+  const onValueDatePickerChange = (value?: IPicker.DatePicker) => {
+    setDate(value);
   };
-  const onClearDatePicker = () => {
-    if (!date) return;
-    setDate(undefined);
+  const onValueTimePickerChange = (value?: IPicker.TimePicker) => {
+    setTime(value);
   };
-  const onChangeTimePicker = (time?: IPicker.TimePicker) => {
-    setTime(time);
-  };
-  const onClearTimePicker = () => {
-    if (!time) return;
-    setTime(undefined);
-  };
-
   return (
     <Root
       className="fs col center"
       $backgroundColor={background}
       $textColor={text}
     >
-      <Picker
-        title={TimeUtil.toDatePickerText(date)}
+      <DateInput
+        value={date}
         placeholder="Date mobile"
-        clearText
-        onClearText={onClearDatePicker}
-        modalType="DATE_PICKER_MODAL"
-        date={date}
-        onChangeDatePicker={onChangeDatePicker}
+        allowClear
+        onValueChange={onValueDatePickerChange}
       />
-      <Picker
-        title={TimeUtil.toTimePickerText(time)}
+      <TimeInput
+        value={time}
         placeholder="Time"
         icon="bi bi-clock"
-        clearText
-        onClearText={onClearTimePicker}
-        modalType="TIME_PICKER_MODAL"
-        time={time}
-        onChangeTimePicker={onChangeTimePicker}
+        allowClear
+        onValueChange={onValueTimePickerChange}
       />
     </Root>
   );

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ModalProvider, ThemeProvider } from "./contexts";
+import { ThemeProvider } from "./contexts";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
@@ -10,9 +10,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ThemeProvider>
-      <ModalProvider>
-        <App />
-      </ModalProvider>
+      <App />
     </ThemeProvider>
   </React.StrictMode>
 );

@@ -8,6 +8,7 @@ import DaySelect from "./DaySelect.component";
 import YearSelect from "./YearSelect.component";
 import Icon from "../../Icon.component";
 import Button from "../../Button.component";
+import { ModalComponentType } from "../../Input.component";
 
 const { BOX, DAYS_IN_WEEK, MODAL, NUMBER } = ConstantConfig;
 const { DATE_PICKER } = MODAL;
@@ -20,20 +21,16 @@ interface RootProps {
   $backgroundColor: string;
 }
 
-interface DatePickerProps {
-  onCloseModal: () => void;
-  date?: IPicker.DatePicker;
-  onChangeDatePicker?: (time: IPicker.DatePicker) => void;
-}
+interface DatePickerProps extends ModalComponentType<IPicker.DatePicker> {}
 
 const DatePicker = (props: DatePickerProps): React.JSX.Element => {
-  const { onCloseModal, date, onChangeDatePicker } = props;
+  const { value, onCloseModal, onConfirmValue } = props;
   const now = new Date();
   const [yearVisible, setYearVisible] = useState(false);
   const [selectingDate, setSelectingDate] = useState({
-    day: date?.day ?? now.getDate(),
-    month: date?.month ?? now.getMonth() + 1, // Function returns 0-11 corresponding to 12 months
-    year: date?.year ?? now.getFullYear(),
+    day: value?.day ?? now.getDate(),
+    month: value?.month ?? now.getMonth() + 1, // Function returns 0-11 corresponding to 12 months
+    year: value?.year ?? now.getFullYear(),
   });
   const dateRef = useRef(selectingDate); // Keep track the selected day
   const { outline, paper } = useTheme();
@@ -59,7 +56,7 @@ const DatePicker = (props: DatePickerProps): React.JSX.Element => {
     setSelectingDate({ ...selectingDate, ...date });
   };
   const onSelectDay = (day: IPicker.DatePicker["day"]) => {
-    onChangeDatePicker && onChangeDatePicker({ ...selectingDate, day });
+    onConfirmValue && onConfirmValue({ ...selectingDate, day });
     onCloseModal();
   };
   return (

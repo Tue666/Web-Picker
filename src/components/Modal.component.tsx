@@ -1,22 +1,20 @@
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import styled, { keyframes } from "styled-components";
-import { MODAL_COMPONENTS } from "../contexts";
-import { useModal, useTheme } from "../hooks";
+import { useTheme } from "../hooks";
 
 interface RootProps {
   $textColor: string;
 }
 
-const Modal = (): React.JSX.Element | null => {
-  const { modalType, modalProps, hide } = useModal();
-  const { text } = useTheme();
-  const Component = modalType && MODAL_COMPONENTS[modalType];
+interface ModalProps extends PropsWithChildren {}
 
-  if (!modalType || !Component) return null;
+const Modal = (props: ModalProps): React.JSX.Element => {
+  const { children } = props;
+  const { text } = useTheme();
 
   return (
-    <Root className="fs col center" $textColor={text}>
-      <Component {...modalProps} onCloseModal={hide} />
+    <Root className="full col center" $textColor={text}>
+      {children}
     </Root>
   );
 };
@@ -32,7 +30,9 @@ const slideAnim = keyframes`
 `;
 
 const Root = styled("div")<RootProps>`
-  position: absolute;
+  position: fixed;
+  top: 0;
+  left: 0;
   background-color: transparent;
   z-index: 9999;
   animation: ${slideAnim} 0.3s ease-in-out;
